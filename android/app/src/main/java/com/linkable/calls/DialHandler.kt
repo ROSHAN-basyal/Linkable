@@ -1,6 +1,7 @@
 package com.linkable.calls
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.content.Context
 import android.content.Intent
@@ -74,6 +75,7 @@ class DialHandler(
         return number.filter { it.isDigit() || it == '+' || it == '*' || it == '#' || it == ',' || it == ';' }
     }
 
+    @SuppressLint("MissingPermission")
     private fun resolveSubscription(simSlotOneBased: Int): SubscriptionInfo? {
         if (!hasPhoneStatePermission()) return null
         val slotIndex = simSlotOneBased - 1
@@ -87,6 +89,7 @@ class DialHandler(
         }.getOrNull()
     }
 
+    @SuppressLint("MissingPermission")
     private fun resolvePhoneAccountHandle(subscriptionId: Int): PhoneAccountHandle? {
         if (!hasPhoneStatePermission()) return null
         val subId = subscriptionId.toString()
@@ -97,6 +100,7 @@ class DialHandler(
         }.getOrNull()
     }
 
+    @SuppressLint("MissingPermission")
     private fun placeCall(
         phoneNumber: String,
         simSlot: Int,

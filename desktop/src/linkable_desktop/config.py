@@ -7,6 +7,8 @@ import platform
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from linkable_desktop.secure_storage import atomic_write_private, ensure_private_directory, enforce_private_file
+
 
 CONFIG_DIR = Path.home() / ".config" / "linkable"
 CONFIG_PATH = CONFIG_DIR / "config.json"
@@ -59,6 +61,7 @@ def load_discovery_config(path: Path | None = None) -> DiscoveryConfig:
     if not file_path.exists():
         return config
 
+    enforce_private_file(file_path)
     data = json.loads(file_path.read_text(encoding="utf-8"))
     merged = asdict(config)
     for key, value in data.items():
@@ -70,15 +73,14 @@ def load_discovery_config(path: Path | None = None) -> DiscoveryConfig:
 def save_default_config_if_missing(path: Path | None = None) -> Path:
     file_path = path or CONFIG_PATH
     if file_path.exists():
+        enforce_private_file(file_path)
         return file_path
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-    file_path.write_text(
+    atomic_write_private(
+        file_path,
         json.dumps(asdict(default_discovery_config()), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
     )
     return file_path
 
 
 def ensure_state_dir() -> Path:
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    return CONFIG_DIR
+    return ensure_private_directory(CONFIG_DIR)

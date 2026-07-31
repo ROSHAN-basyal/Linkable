@@ -1,201 +1,306 @@
 # Linkable
 
-Linkable is a LAN-first Android-to-Linux companion project.
+Linkable connects an Android phone to a Linux desktop over a local network. It
+provides encrypted pairing and reconnect, notification mirroring and replies,
+call controls, file transfer and browsing, phone ringing, contacts and dialing,
+screen mirroring through scrcpy, PC input controls, clipboard forwarding, shared
+app launching, and an optional phone-to-PC camera.
 
-This repository currently implements:
+> **Status:** Linkable is an alpha project. The downloadable Android APK supports
+> Android 8.0 (API 26) and newer. Hardware, OEM battery policies, third-party call
+> actions, Bluetooth HFP, and broad storage access vary by device. The APK is
+> tested before release, but no project can guarantee every Android/OEM variant.
 
-- shared protocol schemas
-- protocol and security documentation
-- packet flow documentation
-- lock-screen policy documentation
-- protobuf stub-generation tooling
-- Milestone 1 verification tooling that works without a globally configured Android SDK
-- Linux desktop discovery utilities
-- Android discovery, pairing, and trusted reconnect
-- encrypted LAN transport with heartbeat
-- Phase 2 notification forwarding from Android to Linux desktop terminal
-- Phase 2 notification reply for apps that expose Android remote-input actions
-- Phase 2 bidirectional encrypted file transfer slice
-- Phase 2 ring-phone utility command over LAN
-- Phase 3 incoming call-state mirroring over LAN
-- Phase 3 desktop call accept/reject/hangup command slice
-- Phase 3 desktop outgoing dialing with SIM-1 preference
-- Phase 3 telephony diagnostics and desktop diagnostic export
-- Phase 3 LAN-only call intelligence for caller/source/SIM/route/capability metadata
-- Bluetooth HFP desktop audio controls for SIM call audio routing
-- Android foreground service runtime for background and screen-off operation
+## Download Android APK
 
-## Current Status
+Download the current signed APK and checksum:
 
-Phase 1 is implemented through secure LAN discovery, short-code pairing, trusted reconnect, encrypted transport, and heartbeat.
+- [Linkable-v0.3.0.apk](https://github.com/ROSHAN-basyal/Linkable/releases/latest/download/Linkable-v0.3.0.apk)
+- [Linkable-v0.3.0.apk.sha256](https://github.com/ROSHAN-basyal/Linkable/releases/latest/download/Linkable-v0.3.0.apk.sha256)
 
-Phase 2 Milestone 1 is implemented as a working vertical slice: Android captures notifications through notification-listener access and forwards posted/removed notification events over the trusted encrypted LAN session. The Linux desktop currently logs those events in the advertiser terminal.
+Release signing-certificate SHA-256:
+`5f471e51a682e6e0aaa4902e18c9e50dd6f053abbdfb89ab8cc36d663868555d`.
 
-Phase 2 Milestone 2 now has a working terminal-driven reply slice: when a notification exposes an Android remote-input action, the desktop prompts for reply text and Android sends it through the original notification action. Per-app filtering and native desktop notification UI remain later Phase 2 work.
-
-Phase 2 Milestone 3 has a bidirectional file-transfer slice: the desktop GUI can send files to Android, and Android can send selected files back to the desktop. Android saves verified incoming desktop files under `/Linkable` when all-files access is granted, sorted into `images`, `videos`, `pdfs`, `apks`, and `files`; otherwise Android falls back to `Downloads/Linkable/...`. Desktop saves verified phone files under `~/Downloads/Linkable`. Progress UI, cancel, and resume are later work.
-
-Phase 2 Milestone 4 has a first utility-control slice: the desktop GUI can queue `Ring Phone` and `Stop Ring` commands over the active encrypted LAN session. Android plays the local alarm/ringtone and vibrates for the requested duration without Bluetooth.
-
-Phase 3 Milestone 1 has a first call-event slice: Android monitors local call state with `READ_PHONE_STATE` and forwards `IDLE`, `RINGING`, and `OFFHOOK` events over the trusted encrypted LAN session. The desktop GUI logs call events and shows the latest call state.
-
-Phase 3 Milestone 2 has a first call-control slice: the desktop GUI can send accept, reject, and hangup commands over the encrypted LAN session. Android executes them through `TelecomManager` when `ANSWER_PHONE_CALLS` permission and device/OEM policy allow it. Bluetooth is still not used.
-
-Phase 3 Milestone 3 has a first outgoing-dial slice: the desktop GUI has a phone-number field and SIM slot field defaulted to `1`. Android attempts to resolve SIM 1 to the active subscription and starts a direct call with `CALL_PHONE` permission. The result reports whether SIM 1 was resolved or the system default may have been used.
-
-Phase 3 Milestone 4 has the first hardening slice: the desktop GUI can request telephony diagnostics from Android, show permission/SIM/capability status, and export a diagnostic text report. The Android app also shows a compact local telephony summary. Live lock-screen call workflow results should be recorded in [phase_3_telephony_validation_matrix.md](/home/rsnb/Documents/My_projects/PC-mobile/phases_documention/phase_3_telephony_validation_matrix.md).
-
-The current LAN-only call-intelligence slice sends richer SIM-call metadata to the desktop: call direction, source classification, caller ID when Android exposes it, masked fallback, SIM slot, subscription ID, carrier, active phone-side audio route, ringer mode, volume state, and call capability flags. Caller ID may still be unavailable on newer Android builds unless `READ_CALL_LOG` is granted or the app is later promoted to a default-dialer/calling integration.
-
-SIM call audio is intentionally handled through Bluetooth HFP instead of LAN packet injection. Bluetooth pairing/connection is now manual through the normal Linux and Android Bluetooth settings. The apps verify whether the active LAN phone is also connected over Bluetooth and whether that connection is A2DP media audio or HFP call audio. The desktop can install a reversible WirePlumber phone-safe mode that removes only the laptop's A2DP sink role, so phones stop routing YouTube/media audio to the laptop while HFP call audio remains available. LAN remains the control and metadata transport.
-
-Android now runs the connection stack from a foreground service instead of only the UI `ViewModel`. Discovery, trusted reconnect, encrypted heartbeats, notification reply, file transfer, ring phone, call control, dialing, call metadata, and Bluetooth status checks remain active when the app is backgrounded or the screen is off. The app also exposes an `Allow Unrestricted Battery` button because some OEM battery managers can still kill foreground services unless the user exempts the app.
-
-The Linkable rename is now applied to the Android package (`com.linkable`), Linux package (`linkable_desktop`), app label, launcher/autostart entries, config directory (`~/.config/linkable`), and mDNS service (`_linkable._tcp.local.`). Existing old app trust records should be considered obsolete and re-pairing is expected.
-
-The current feature slice also adds safe-listed Wi-Fi enforcement for trusted reconnect. The first pairing records the current Wi-Fi network; future automatic reconnect only runs on networks already safe-listed for that desktop. If the phone sees the trusted desktop on a new Wi-Fi, the user must explicitly press Connect from the app to approve that current network.
-
-The PyQt6 desktop control center is available. Install its dependency into the project venv only:
+Verify and install over USB:
 
 ```bash
-./scripts/setup_desktop_venv.sh
-source ./scripts/desktop_env.sh
-python -m pip install -r desktop/requirements-ui.txt
+sha256sum -c Linkable-v0.3.0.apk.sha256
+adb install -r Linkable-v0.3.0.apk
 ```
 
-Run it with:
+For installation directly on the phone, allow your browser or file manager to
+install unknown apps, open the APK, and approve the Android installer prompt.
+Only install APKs downloaded from this repository's Releases page and verify the
+SHA-256 checksum when possible.
+
+If a locally built debug version is already installed, Android will reject the
+release APK because it has a different signing certificate. Uninstall the debug
+app first, then install the release APK. Uninstalling clears Linkable's local
+trust/settings, so pair the devices again afterward.
+
+## Linux Prerequisites
+
+The desktop application targets Arch Linux, EndeavourOS, Manjaro, and other
+Arch-based distributions. Python dependencies are installed in a project-local
+virtual environment; Linkable never modifies Arch's system Python with pip.
+
+Install the base runtime:
 
 ```bash
+sudo pacman -S --needed git python python-pip avahi nss-mdns libnotify \
+  pipewire pipewire-pulse wireplumber
+sudo systemctl enable --now avahi-daemon.service
+```
+
+Install feature-specific packages as needed:
+
+```bash
+# ADB and screen mirroring
+sudo pacman -S --needed android-tools scrcpy
+
+# Bluetooth status and SIM-call HFP audio
+sudo pacman -S --needed bluez bluez-utils
+sudo systemctl enable --now bluetooth.service
+
+# Phone keyboard/trackpad control
+sudo pacman -S --needed ydotool
+
+# Phone camera exposed as "Linkable Camera"
+sudo pacman -S --needed v4l2loopback-dkms v4l-utils ffmpeg linux-headers
+```
+
+Use the header package matching the running kernel (`linux-lts-headers`,
+`linux-zen-headers`, and so on) instead of `linux-headers` when applicable.
+ADB, scrcpy, ydotool, Bluetooth, and virtual-camera packages are optional; the
+encrypted LAN connection, notifications, and basic transfers do not require all
+of them.
+
+## Install and Run the Desktop
+
+### Recommended source installation
+
+```bash
+git clone https://github.com/ROSHAN-basyal/Linkable.git
+cd Linkable
+./scripts/setup_desktop_venv.sh
+./scripts/install_desktop_app.sh
 ./scripts/run_desktop_gui.sh
 ```
 
-## Repository Layout
-
-```text
-PC-mobile/
-├── android/               # Android-specific notes and future app landing zone
-├── desktop/               # Desktop-specific notes and future app landing zone
-├── phases_documention/    # Roadmaps, blueprint, and prerequisite notes
-├── protocol/              # Milestone 1 deliverables
-├── scripts/               # Code generation and verification scripts
-└── shared/                # Cross-platform shared assets
-```
-
-## Current Quick Start
-
-1. Set up the desktop virtual environment if you need Python dependencies such as `zeroconf`:
+To keep only the low-power LAN/notification service running after login:
 
 ```bash
-./scripts/setup_desktop_venv.sh
+./scripts/install_desktop_app.sh --autostart
 ```
 
-2. Run the desktop checks:
+The GUI does not autostart. The systemd user service runs with
+`--background-service`; opening the GUI temporarily hands the LAN port to the
+GUI and restores the background service when the window closes.
+
+Useful commands:
 
 ```bash
-./scripts/check_milestone_4.sh
-```
-
-3. Run the Linux desktop advertiser:
-
-```bash
+./scripts/run_desktop_gui.sh
 ./scripts/run_desktop.sh advertise
+./scripts/run_tests.sh
+systemctl --user status linkable-desktop.service
 ```
 
-Or run the GUI:
+### Native Arch package
+
+After cloning, build a package from the checked-out source:
 
 ```bash
-./scripts/run_desktop_gui.sh
+cd desktop/packaging
+makepkg -si
+linkable-desktop
 ```
 
-In the GUI, use `Pick File`, then `Send File`. The queued file sends on the active or next trusted phone heartbeat. Use `Ring Phone` to trigger the phone finder command. Incoming call states and call metadata appear in the desktop log and phone-utilities status area after the Android app has phone-state permission. Use `Accept Call`, `Reject Call`, or `Hang Up` to test call controls on supported devices. For outgoing calls, enter a number, leave SIM as `1`, and press `Dial`. Use `Refresh Telephony` after the phone is connected to verify permissions, SIM mapping, ringer mode, route, and call capabilities; use `Export Diagnostics` to save the current status and event log.
-
-The desktop GUI now uses a pairing gate. If no phone is trusted yet, new pairing is open so the first phone can be added. After at least one trusted phone exists, new pairing requests are blocked by default and trusted reconnect still works through signed session proof. Use `Allow New Pairing 2m` only when intentionally adding another phone.
-
-Phone display mirroring is handled by `scrcpy` from the desktop GUI. `Mirror USB` uses the authorized USB-debugging device. For LAN mirroring, connect once by USB, press `Prepare LAN ADB`, then `Mirror LAN`; or manually pair Android Wireless debugging and enter that ADB endpoint. Mirroring uses `--no-audio` so it does not interfere with the separate Bluetooth call-audio route. If the phone is locked, the lock screen is mirrored and can be unlocked from the scrcpy window after ADB authorization.
-
-PC Controls are available from the Android app behind the `PC Controls` button. Text entry, pointer movement/click/scroll, speaker volume, and mic mute travel over the encrypted LAN session. The desktop executes keyboard/pointer actions through `ydotool`/uinput and audio controls through `wpctl` or `pactl`.
-
-For SIM call audio, use the GUI `Bluetooth HFP Call Audio` section:
-
-```text
-Pair phone and laptop manually in OS Bluetooth settings -> Refresh Bluetooth -> Check Phone Bluetooth
-```
-
-Both apps show whether the current connection is `LAN only` or `LAN + Bluetooth`. Android also reports whether the matched laptop is connected as `Media audio`/A2DP; if so, install `Phone-safe BT` from the desktop GUI and reconnect Bluetooth. When you press `Accept Call` or `Dial` in the desktop UI, the desktop switches only the matched phone Bluetooth card to HFP/HSP for SIM call audio, then returns that phone card to `off` after the call reports idle. It does not start pairing, trust/connect devices, or switch unrelated Bluetooth headsets.
-
-The equivalent terminal status command is:
+Enable its background service only if wanted:
 
 ```bash
-./scripts/run_desktop.sh hfp-status
-./scripts/run_desktop.sh hfp-install-phone-safe
-./scripts/run_desktop.sh hfp-remove-phone-safe
+systemctl --user enable --now linkable-desktop.service
 ```
 
-Manual Bluetooth pairing is required. Open Android Bluetooth settings and Linux Bluetooth settings yourself, pair the devices, then use `Refresh Bluetooth` and `Check Phone Bluetooth` in the GUI.
+## Firewall
 
-If Android sends normal media/video audio to the laptop, disable `Media audio` for this laptop in Android Bluetooth device settings. Do not disable A2DP globally on Linux if this laptop also uses Bluetooth headsets.
+Linkable advertises `_linkable._tcp.local.` over mDNS (UDP 5353) and listens on
+TCP `37891` by default. The GUI never runs sudo or changes the firewall
+automatically.
 
-To send one file to the next trusted phone session:
+For firewalld:
 
 ```bash
-./scripts/run_desktop.sh advertise --send-file ./README.md
+sudo firewall-cmd --add-port=37891/tcp --permanent
+sudo firewall-cmd --add-service=mdns --permanent
+sudo firewall-cmd --reload
 ```
 
-4. Build and install the Android app:
+For UFW:
+
+```bash
+sudo ufw allow 37891/tcp
+sudo ufw allow 5353/udp
+```
+
+If `~/.config/linkable/config.json` overrides `service_port`, open that port
+instead. Prefer a firewall zone scoped to the trusted home LAN. An open Linkable
+port does not establish trust by itself: unknown peers must pass the pairing
+gate and cryptographic verification.
+
+## Connect Phone and Desktop
+
+1. Connect both devices to the same private Wi-Fi network.
+2. Start `./scripts/run_desktop_gui.sh`, enable **LAN Service**, and press
+   **Add Devices**. This opens a short pairing window.
+3. Install/open Linkable on Android, grant nearby-device/location access needed
+   by Android network discovery, and press **Scan**.
+4. Select the desktop. The phone displays a large six-digit code.
+5. Enter that code in the desktop prompt and press Enter. The phone validates
+   the authenticated transcript and completes pairing automatically.
+6. Tap **OK** on the phone after reading the code. This only dismisses the code;
+   it does not authorize the pairing.
+7. Enable requested feature permissions individually. Notification access is a
+   special Android Settings permission and must be enabled there.
+
+Trusted devices reconnect automatically when they return to an approved Wi-Fi.
+If Safe Wi-Fi mode is enabled, moving to a new network requires explicit
+approval before that SSID is added. **Disconnect** is temporary, **Unpair**
+disables automatic reconnect until reconnect is requested, and **Forget**
+removes trust and device settings so the next contact is a new pairing.
+
+If discovery fails:
+
+```bash
+systemctl status avahi-daemon.service
+ss -ltn | grep 37891
+avahi-browse -rt _linkable._tcp
+```
+
+Confirm AP/client isolation is disabled on the router. As a fallback, enter the
+desktop's LAN IP and configured port in Android Direct Connect.
+
+## Android Permissions
+
+Linkable requests permissions only for enabled features:
+
+| Permission/access | Feature |
+| --- | --- |
+| Nearby devices/location and Wi-Fi multicast | mDNS discovery |
+| Notification listener | notification forwarding, replies, app-call actions |
+| Phone state, call log, answer calls, call phone | SIM metadata/control/dialing |
+| Contacts | desktop contact lookup |
+| Camera | user-approved camera sessions |
+| Files/all-files access | broad storage browsing and transfer; document picker and Downloads fallback remain available |
+| Foreground service and battery exemption | trusted reconnect while backgrounded |
+| Bluetooth nearby devices | verify that LAN and Bluetooth refer to the same paired phone/PC |
+
+Android and third-party apps remain the authority. WhatsApp, Messenger, and
+similar calls can only be answered or rejected when their notification exposes
+the corresponding Android `PendingIntent` action. Linkable does not bypass the
+lock screen or Android permission model.
+
+## Mirroring, Camera, and Bluetooth
+
+- **Mirror USB:** authorize USB debugging, connect USB, then press Mirror USB.
+- **Mirror LAN:** authorize once over USB, prepare ADB TCP mode, then use Mirror
+  LAN. Wireless Debugging can also be paired manually.
+- **Camera LAN:** MJPEG frames travel inside the existing encrypted Linkable
+  session.
+- **Camera USB:** `adb reverse` carries the short-lived authenticated camera
+  socket over USB. The desktop publishes frames through V4L2 loopback.
+- **Call audio:** pair phone and PC manually in normal Bluetooth settings.
+  Linkable uses LAN for control/metadata and HFP only during a desktop-answered
+  or desktop-dialed SIM call.
+
+Install the virtual camera once:
+
+```bash
+./scripts/setup_linkable_camera.sh --persist
+```
+
+## Build the Android App
+
+### Prerequisites
+
+- JDK 17
+- Android SDK command-line tools or Android Studio
+- Android SDK Platform 36
+- Android SDK Build Tools 36.0.0
+
+On Arch, Android Studio from the AUR is the simplest supported SDK installer.
+The SDK normally lands at `~/Android/Sdk`. With `sdkmanager` available:
+
+```bash
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+```
+
+The repository includes the checksum-pinned Gradle 8.9 wrapper required by
+Android Gradle Plugin 8.7. Protobuf Java Lite sources are generated
+automatically from `protocol/schemas`; no global Gradle or protoc is required.
+
+Build and install a debug APK:
 
 ```bash
 source ./scripts/android_env.sh
-export GRADLE_USER_HOME="$PWD/.gradle-session"
-"${LINKABLE_GRADLE_BIN}" -p android assembleDebug
+./android/gradlew -p android testDebugUnitTest assembleDebug
 adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-5. Enable Android notification listener access from the app by tapping `Notification Access`, then connect to the trusted desktop and trigger a notification from another app. The desktop advertiser terminal should print `[notification] ...`. If the notification has a reply action, the terminal will prompt for an action id and reply text.
+Build a locally signed release:
 
-Generated protocol outputs still land here:
+```bash
+./scripts/generate_android_signing_key.sh
+source "${XDG_CONFIG_HOME:-$HOME/.config}/linkable/signing/release.env"
+./scripts/build_android_release.sh
+```
 
-- `protocol/generated/python`
-- `protocol/generated/android-java`
-- `protocol/generated/descriptor`
+Back up the generated keystore and environment file securely. Android requires
+all future updates to use the same signing key. Signing material is ignored by
+Git and must never be committed.
 
-## Design Notes
+## Security Design
 
-- The protocol is **LAN-first** and **Bluetooth-free** for Milestone 1.
-- Android output generation intentionally targets **Java Lite protobuf classes** instead of Kotlin-specific protobuf classes.
-  This is a deliberate deviation from the blueprint because it removes the need for a Kotlin protobuf codegen plugin during Milestone 1, while remaining fully consumable from Kotlin later.
-- The top-level wire `Envelope` uses a typed header plus raw `bytes payload` instead of a `oneof` body.
-  This keeps the transport framing simple and avoids cross-file import cycles between packet families.
-- Milestone 2 uses `zeroconf` on the Linux side for mDNS advertisement and browsing, but wraps it so the codebase can still be imported and unit-tested even if that dependency is not installed.
-- Android local-network tooling is detected by scripts instead of assuming globally exported SDK variables.
+- Pairing is user-initiated and time-limited. A six-digit code is derived from
+  fresh nonces and both identity public keys; the code itself is not advertised.
+- Each device has a persistent P-256 ECDSA identity. Android stores its private
+  key in Android Keystore. Linux stores its identity and trust records under
+  `~/.config/linkable` with directory mode `0700` and file mode `0600`.
+- Trusted reconnect verifies signed session-init transcripts against the pinned
+  public key. A device name, IP address, mDNS record, or Bluetooth name alone is
+  never sufficient.
+- Every LAN session uses ephemeral P-256 ECDH, HKDF-SHA-256 directional keys,
+  and AES-256-GCM framed encryption with monotonic counters and replay
+  rejection.
+- File transfers include declared sizes and SHA-256 verification. Camera LAN
+  frames use the same encrypted session; USB camera transport stays inside ADB
+  reverse forwarding and uses a random per-session token.
+- Android backup/device transfer excludes Linkable trust and configuration.
+  Linux private-state writes are atomic and permission-restricted.
+- Safe Wi-Fi is an additional policy boundary, not a replacement for
+  cryptographic authentication.
 
-## Local Tooling Assumptions
+Threat model and packet details:
 
-Milestone 1 only requires:
+- [Threat model](protocol/docs/threat_model.md)
+- [Protocol specification](protocol/docs/protocol_spec.md)
+- [Packet flow](protocol/docs/packet_flow.md)
 
-- `bash`
-- `python3`
-- `protoc`
-- `javac` for later Android-side work, though not for the Milestone 1 verifier
+## Verification
 
-Desktop-side Python dependencies should be installed in the project-local virtual environment, not into the system Python:
+Run the same primary checks used by CI:
 
 ```bash
 ./scripts/setup_desktop_venv.sh
-source ./scripts/desktop_env.sh
+PYTHONPATH=desktop/src .venv-desktop/bin/python -m unittest discover -s desktop/tests
+./android/gradlew -p android testDebugUnitTest assembleDebug
+bash -n scripts/*.sh
 ```
 
-For broader environment notes, see:
+The release APK is additionally verified with Android SDK `apksigner` before it
+is uploaded. See [GitHub Actions](.github/workflows/ci.yml) for the clean-run
+build definition.
 
-- [phase_1_prerequisites.md](/home/rsnb/Documents/My_projects/PC-mobile/phases_documention/phase_1_prerequisites.md)
+## License
 
-## Current Files
-
-- desktop entrypoint: [main.py](/home/rsnb/Documents/My_projects/PC-mobile/desktop/src/main.py)
-- desktop advertiser: [mdns_advertiser.py](/home/rsnb/Documents/My_projects/PC-mobile/desktop/src/linkable_desktop/discovery/mdns_advertiser.py)
-- desktop browser: [mdns_browser.py](/home/rsnb/Documents/My_projects/PC-mobile/desktop/src/linkable_desktop/discovery/mdns_browser.py)
-- desktop pairing/session server: [pairing_server.py](/home/rsnb/Documents/My_projects/PC-mobile/desktop/src/linkable_desktop/pairing/pairing_server.py)
-- Android discovery manager: [NsdDiscoveryManager.kt](/home/rsnb/Documents/My_projects/PC-mobile/android/app/src/main/java/com/linkable/discovery/NsdDiscoveryManager.kt)
-- Android discovery UI: [DiscoveryScreen.kt](/home/rsnb/Documents/My_projects/PC-mobile/android/app/src/main/java/com/linkable/ui/screens/DiscoveryScreen.kt)
-- Android pairing/session manager: [PairingManager.kt](/home/rsnb/Documents/My_projects/PC-mobile/android/app/src/main/java/com/linkable/pairing/PairingManager.kt)
-- Android notification listener: [PhoneNotificationListener.kt](/home/rsnb/Documents/My_projects/PC-mobile/android/app/src/main/java/com/linkable/notifications/PhoneNotificationListener.kt)
-- environment helper: [android_env.sh](/home/rsnb/Documents/My_projects/PC-mobile/scripts/android_env.sh)
+Linkable is distributed under the [MIT License](LICENSE).

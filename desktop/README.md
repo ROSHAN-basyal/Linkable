@@ -13,7 +13,7 @@ From the repository root:
 ./scripts/run_desktop.sh advertise --send-file ./README.md
 ./scripts/run_desktop.sh browse
 ./scripts/run_desktop.sh browse --status-window
-./scripts/run_desktop.sh connect-by-ip 192.168.1.20:7734
+./scripts/run_desktop.sh connect-by-ip 192.168.1.20:37891
 ./scripts/run_desktop.sh list-trusted
 ./scripts/run_desktop.sh forget-trusted DEVICE_ID
 ./scripts/run_desktop.sh hfp-status

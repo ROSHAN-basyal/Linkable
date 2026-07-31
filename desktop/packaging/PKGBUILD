@@ -1,9 +1,10 @@
-# Maintainer: rsnb
+# Maintainer: ROSHAN-basyal
 pkgname=linkable-desktop
-pkgver=0.1.0
+pkgver=0.3.0
 pkgrel=1
-pkgdesc="Linux desktop companion for Linkable phone integration"
+pkgdesc="LAN-first Android companion for Linux"
 arch=("any")
+url="https://github.com/ROSHAN-basyal/Linkable"
 license=("MIT")
 depends=(
   "python"
@@ -11,27 +12,52 @@ depends=(
   "python-protobuf"
   "python-zeroconf"
   "python-cryptography"
-  "android-tools"
-  "scrcpy"
+  "avahi"
   "libnotify"
-  "pipewire-pulse"
 )
 optdepends=(
-  "firewalld: firewall setup helper"
-  "ufw: alternate firewall setup helper"
-  "avahi: mDNS advertisement backend"
-  "ydotool: future keyboard and pointer relay"
+  "android-tools: USB and LAN ADB integration"
+  "scrcpy: phone screen mirroring"
+  "pipewire-pulse: call audio and volume controls"
+  "wireplumber: Bluetooth HFP profile management"
+  "bluez-utils: Bluetooth status and HFP diagnostics"
+  "ydotool: Wayland/X11 keyboard and pointer relay"
+  "v4l2loopback-dkms: Linkable virtual camera"
+  "v4l-utils: virtual-camera inspection"
+  "ffmpeg: virtual-camera frame delivery"
 )
-makedepends=("python-build" "python-installer" "python-wheel")
-source=("$pkgname::file://${startdir}/../..")
-sha256sums=("SKIP")
-
-build() {
-  cd "$srcdir/linkable-desktop/desktop"
-  python -m build --wheel --no-isolation
-}
+source=()
+sha256sums=()
 
 package() {
-  cd "$srcdir/linkable-desktop/desktop"
-  python -m installer --destdir="$pkgdir" dist/*.whl
+  local root="${startdir}/../.."
+  local target="${pkgdir}/usr/share/linkable"
+
+  install -d "${target}/desktop" "${target}/scripts"
+  cp -a "${root}/desktop/src" "${target}/desktop/"
+  cp -a "${root}/Icons" "${target}/"
+  find "${target}" -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete
+  find "${target}" -depth -type d -name "__pycache__" -empty -delete
+  install -Dm755 "${root}/scripts/setup_linkable_camera.sh" \
+    "${target}/scripts/setup_linkable_camera.sh"
+  install -Dm644 "${root}/README.md" "${target}/README.md"
+  install -Dm644 "${root}/LICENSE" "${target}/LICENSE"
+
+  install -d "${pkgdir}/usr/bin"
+  cat > "${pkgdir}/usr/bin/linkable-desktop" <<'EOF'
+#!/bin/sh
+export PYTHONPATH="/usr/share/linkable/desktop/src${PYTHONPATH:+:${PYTHONPATH}}"
+exec /usr/bin/python -m linkable_desktop.ui_pyqt.app "$@"
+EOF
+  chmod 0755 "${pkgdir}/usr/bin/linkable-desktop"
+
+  install -d "${pkgdir}/usr/share/applications"
+  sed \
+    -e 's|Exec=.*|Exec=linkable-desktop|' \
+    -e '/^Path=/d' \
+    "${root}/desktop/packaging/linkable.desktop.in" \
+    > "${pkgdir}/usr/share/applications/linkable.desktop"
+  chmod 0644 "${pkgdir}/usr/share/applications/linkable.desktop"
+  install -Dm644 "${root}/desktop/packaging/linkable-desktop.service" \
+    "${pkgdir}/usr/lib/systemd/user/linkable-desktop.service"
 }

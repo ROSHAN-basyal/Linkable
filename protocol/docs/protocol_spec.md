@@ -374,7 +374,7 @@ Security guarantees do not change:
 Recommended defaults for later milestones:
 
 - service type: `_linkable._tcp.local.`
-- service port: `7734`
+- default service port: `37891` (configurable)
 - pairing code length: `6`
 - pairing timeout: `120 seconds`
 - heartbeat interval: `15 seconds`

@@ -1,0 +1,13 @@
+[Unit]
+Description=Linkable background LAN service
+After=network-online.target avahi-daemon.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/linkable-desktop --background-service
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

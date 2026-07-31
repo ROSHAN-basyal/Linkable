@@ -19,6 +19,6 @@ class DirectConnectHelperTest {
     fun usesDefaultPortWhenMissing() {
         val result = DirectConnectHelper.parse("192.168.0.5")
         assertTrue(result.isSuccess)
-        assertEquals(7734, result.getOrThrow().port)
+        assertEquals(37891, result.getOrThrow().port)
     }
 }

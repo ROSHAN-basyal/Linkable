@@ -9,6 +9,8 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from linkable_desktop.secure_storage import atomic_write_private, ensure_private_directory, enforce_private_file
+
 
 def _device_id_from_public_key(public_key_bytes: bytes) -> str:
     digest = hashlib.sha256(public_key_bytes).digest()
@@ -43,17 +45,19 @@ class DeviceIdentity:
 
     @classmethod
     def load_or_create(cls, path: Path, *, device_name: str) -> "DeviceIdentity":
-        path.parent.mkdir(parents=True, exist_ok=True)
+        ensure_private_directory(path.parent)
         if path.exists():
+            enforce_private_file(path)
             private_key = serialization.load_pem_private_key(path.read_bytes(), password=None)
         else:
             private_key = ec.generate_private_key(ec.SECP256R1())
-            path.write_bytes(
+            atomic_write_private(
+                path,
                 private_key.private_bytes(
                     encoding=serialization.Encoding.PEM,
                     format=serialization.PrivateFormat.PKCS8,
                     encryption_algorithm=serialization.NoEncryption(),
-                )
+                ),
             )
         return cls(device_name=device_name, private_key=private_key)
 
@@ -66,4 +70,3 @@ class DeviceIdentity:
             device_name=self.device_name,
             public_key_bytes=self.public_key_bytes,
         )
-

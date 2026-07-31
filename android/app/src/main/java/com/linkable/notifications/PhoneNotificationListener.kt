@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
@@ -259,12 +260,17 @@ class PhoneNotificationListener : NotificationListenerService() {
         val normalActions = notification.actions.orEmpty().mapIndexed { index, action ->
             val title = action.title?.toString().orEmpty()
             val supportsRemoteInput = !action.remoteInputs.isNullOrEmpty()
+            val nativeSemanticAction = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                action.semanticAction
+            } else {
+                Notification.Action.SEMANTIC_ACTION_NONE
+            }
             NotificationAction.newBuilder()
                 .setActionId(index.toString())
                 .setTitle(title)
                 .setSupportsRemoteInput(supportsRemoteInput)
                 .setSupportsPlainIntent(action.actionIntent != null && !supportsRemoteInput)
-                .setSemantic(actionSemantic(title, supportsRemoteInput, action.semanticAction))
+                .setSemantic(actionSemantic(title, supportsRemoteInput, nativeSemanticAction))
                 .build()
         }
         val callStyleActions = listOfNotNull(

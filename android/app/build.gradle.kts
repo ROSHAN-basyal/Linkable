@@ -1,7 +1,16 @@
+import com.google.protobuf.gradle.proto
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.protobuf")
 }
+
+val releaseKeystore = providers.environmentVariable("LINKABLE_ANDROID_KEYSTORE").orNull
+val releaseKeyAlias = providers.environmentVariable("LINKABLE_ANDROID_KEY_ALIAS").orNull
+val releaseStorePassword = providers.environmentVariable("LINKABLE_ANDROID_STORE_PASSWORD").orNull
+val releaseKeyPassword = providers.environmentVariable("LINKABLE_ANDROID_KEY_PASSWORD").orNull
+val releaseSigningValues = listOf(releaseKeystore, releaseKeyAlias, releaseStorePassword, releaseKeyPassword)
 
 android {
     namespace = "com.linkable"
@@ -11,8 +20,8 @@ android {
         applicationId = "com.linkable"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -20,9 +29,25 @@ android {
         }
     }
 
+    val releaseSigning = if (releaseSigningValues.all { !it.isNullOrBlank() }) {
+        signingConfigs.create("linkableRelease") {
+            storeFile = file(releaseKeystore!!)
+            storePassword = releaseStorePassword
+            keyAlias = releaseKeyAlias
+            keyPassword = releaseKeyPassword
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+        }
+    } else {
+        null
+    }
+
     buildTypes {
         release {
+            isDebuggable = false
             isMinifyEnabled = false
+            signingConfig = releaseSigning
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -54,7 +79,26 @@ android {
     }
 
     sourceSets {
-        getByName("main").java.srcDir(file("${rootDir}/../protocol/generated/android-java"))
+        getByName("main") {
+            proto {
+                srcDir(file("${rootDir}/../protocol/schemas"))
+            }
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.27.0"
+    }
+    generateProtoTasks {
+        all().configureEach {
+            builtins {
+                create("java") {
+                    option("lite")
+                }
+            }
+        }
     }
 }
 

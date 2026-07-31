@@ -7,6 +7,7 @@ from threading import Lock
 from typing import Any
 
 from linkable_desktop.config import CONFIG_DIR
+from linkable_desktop.secure_storage import atomic_write_private, enforce_private_file
 
 
 DEVICE_SETTINGS_PATH = CONFIG_DIR / "device_settings.json"
@@ -57,6 +58,7 @@ class DeviceSettingsStore:
     def _load(self) -> dict[str, dict[str, Any]]:
         if not self.path.exists():
             return {}
+        enforce_private_file(self.path)
         raw = json.loads(self.path.read_text(encoding="utf-8"))
         devices = raw.get("devices", {})
         if not isinstance(devices, dict):
@@ -68,9 +70,8 @@ class DeviceSettingsStore:
         }
 
     def _save(self, devices: dict[str, dict[str, Any]]) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {"devices": devices}
-        self.path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        atomic_write_private(self.path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
 def _settings_from_json(data: dict[str, Any]) -> DesktopDeviceSettings:

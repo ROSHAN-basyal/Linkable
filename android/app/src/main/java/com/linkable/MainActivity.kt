@@ -38,8 +38,11 @@ class MainActivity : ComponentActivity() {
                 queuePickedSendFile(uri, persistable = false)
             }
         }
-        val safeWifiLocationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
+        val safeWifiLocationPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+            val locationGranted =
+                grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            if (locationGranted) {
                 discoveryViewModel?.setAllowPairingOnAllWifi(false)
             } else {
                 discoveryViewModel?.refreshSafeWifi()
@@ -120,14 +123,14 @@ class MainActivity : ComponentActivity() {
                     onSetNotificationBlocked = viewModel::setNotificationBlocked,
                     onSetAllowPairingOnAllWifi = { allowAll ->
                         if (!allowAll && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            safeWifiLocationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                            safeWifiLocationPermission.launch(locationPermissions())
                         } else {
                             viewModel.setAllowPairingOnAllWifi(allowAll)
                         }
                     },
                     onSetSafeWifiEnabled = viewModel::setSafeWifiEnabled,
                     onRequestLocationForSafeWifi = {
-                        safeWifiLocationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                        safeWifiLocationPermission.launch(locationPermissions())
                     },
                     onApproveCameraRequest = {
                         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -264,10 +267,15 @@ class MainActivity : ComponentActivity() {
 
     private fun requestLocationPermissionIfNeeded() {
         requestRuntimePermissionsIfMissing(
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            locationPermissions(),
             REQUEST_LOCATION_PERMISSION,
         )
     }
+
+    private fun locationPermissions(): Array<String> = arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    )
 
     private fun requestRuntimePermissionsIfMissing(permissions: Array<String>, requestCode: Int) {
         val missing = permissions.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }

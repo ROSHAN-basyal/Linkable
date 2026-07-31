@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from linkable_desktop.config import CONFIG_DIR
+from linkable_desktop.secure_storage import atomic_write_private, enforce_private_file
 
 
 SETUP_STATE_PATH = CONFIG_DIR / "desktop_setup.json"
@@ -26,6 +27,7 @@ class FirstRunState:
 def load_first_run_state() -> FirstRunState:
     if not SETUP_STATE_PATH.exists():
         return FirstRunState(completed=False, safe_wifi_ssids=())
+    enforce_private_file(SETUP_STATE_PATH)
     data = json.loads(SETUP_STATE_PATH.read_text(encoding="utf-8"))
     return FirstRunState(
         completed=bool(data.get("completed", False)),
@@ -35,8 +37,8 @@ def load_first_run_state() -> FirstRunState:
 
 
 def save_first_run_state(state: FirstRunState) -> None:
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    SETUP_STATE_PATH.write_text(
+    atomic_write_private(
+        SETUP_STATE_PATH,
         json.dumps(
             {
                 "completed": state.completed,
@@ -47,7 +49,6 @@ def save_first_run_state(state: FirstRunState) -> None:
             sort_keys=True,
         )
         + "\n",
-        encoding="utf-8",
     )
 
 
@@ -64,10 +65,7 @@ def add_safe_wifi_ssid(ssid: str) -> tuple[str, ...]:
             skipped_optional_checks=current_state.skipped_optional_checks,
         )
     )
-    SAFE_NETWORKS_PATH.write_text(
-        json.dumps({"wifi_ssids": list(safe)}, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    atomic_write_private(SAFE_NETWORKS_PATH, json.dumps({"wifi_ssids": list(safe)}, indent=2, sort_keys=True) + "\n")
     return safe
 
 

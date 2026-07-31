@@ -20,7 +20,7 @@ data class DirectConnectCandidate(
 }
 
 object DirectConnectHelper {
-    fun parse(input: String, defaultPort: Int = 7734): Result<DirectConnectCandidate> = runCatching {
+    fun parse(input: String, defaultPort: Int = 37891): Result<DirectConnectCandidate> = runCatching {
         val trimmed = input.trim()
         require(trimmed.isNotEmpty()) { "Endpoint is empty" }
 

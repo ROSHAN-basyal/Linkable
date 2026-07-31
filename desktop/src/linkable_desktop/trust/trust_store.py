@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Lock
 
+from linkable_desktop.secure_storage import atomic_write_private, enforce_private_file
+
 from .device_record import TrustedDeviceRecord
 
 
@@ -16,6 +18,7 @@ class TrustStore:
     def _load(self) -> dict[str, TrustedDeviceRecord]:
         if not self.path.exists():
             return {}
+        enforce_private_file(self.path)
         raw = json.loads(self.path.read_text(encoding="utf-8"))
         return {
             entry["device_id"]: TrustedDeviceRecord.from_json(entry)
@@ -23,11 +26,10 @@ class TrustStore:
         }
 
     def _save(self, devices: dict[str, TrustedDeviceRecord]) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "devices": [record.to_json() for record in sorted(devices.values(), key=lambda item: item.device_name.lower())]
         }
-        self.path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        atomic_write_private(self.path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
     def upsert(self, record: TrustedDeviceRecord) -> None:
         with self._lock:

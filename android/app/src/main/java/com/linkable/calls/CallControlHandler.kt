@@ -1,6 +1,7 @@
 package com.linkable.calls
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -40,6 +41,7 @@ class CallControlHandler(
         return result(request, success = success, detail = outcome)
     }
 
+    @SuppressLint("MissingPermission")
     private fun acceptCall(): String {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return "accept call unsupported below Android 8"
@@ -48,6 +50,7 @@ class CallControlHandler(
         return "accept call requested"
     }
 
+    @SuppressLint("MissingPermission")
     private fun endCall(label: String): String {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             return "$label unsupported below Android 9"

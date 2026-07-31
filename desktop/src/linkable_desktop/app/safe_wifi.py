@@ -5,6 +5,7 @@ import subprocess
 from dataclasses import dataclass
 
 from linkable_desktop.config import CONFIG_DIR
+from linkable_desktop.secure_storage import atomic_write_private, enforce_private_file
 
 
 SAFE_WIFI_POLICY_PATH = CONFIG_DIR / "desktop_safe_wifi.json"
@@ -93,11 +94,11 @@ class DesktopSafeWifiStore:
     def _read(self) -> dict[str, object]:
         if not SAFE_WIFI_POLICY_PATH.exists():
             return {"allow_all_wifi": False, "networks": []}
+        enforce_private_file(SAFE_WIFI_POLICY_PATH)
         return json.loads(SAFE_WIFI_POLICY_PATH.read_text(encoding="utf-8"))
 
     def _write(self, data: dict[str, object]) -> None:
-        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-        SAFE_WIFI_POLICY_PATH.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        atomic_write_private(SAFE_WIFI_POLICY_PATH, json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 
 def current_wifi_ssid() -> str:

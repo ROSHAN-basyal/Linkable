@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Linkable
-Comment=LAN companion for Android notifications, files, calls, and mirroring
+Comment=Connect an Android phone to Linux over an encrypted LAN session
 Exec=@ROOT_DIR@/scripts/run_desktop_gui.sh
 Path=@ROOT_DIR@
 Icon=smartphone

@@ -728,10 +728,10 @@ class PairingManager(
     private fun fallbackTrustedReconnectCandidates(trustedDevice: TrustedDevice): List<DiscoveredDevice> {
         return nearbyWifiHosts().map { host ->
             DiscoveredDevice(
-                serviceName = "fallback://$host:7734",
+                serviceName = "fallback://$host:37891",
                 deviceName = trustedDevice.deviceName,
                 host = host,
-                port = 7734,
+                port = 37891,
                 protocolVersion = "trusted-fallback",
                 deviceId = trustedDevice.deviceId,
                 source = DiscoverySource.DIRECT_CONNECT,

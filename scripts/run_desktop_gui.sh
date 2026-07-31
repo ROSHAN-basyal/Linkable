@@ -16,11 +16,11 @@ fi
 
 if [[ "${1:-}" != "--background-service" ]] && ! "${LINKABLE_DESKTOP_PYTHON}" -c "import PyQt6" >/dev/null 2>&1; then
   cat >&2 <<'EOF'
-PyQt6 is not installed in .venv-desktop.
+PyQt6 is not installed in the Linkable desktop environment.
 
 Install GUI dependencies without touching system Python:
 
-  cd /home/rsnb/Documents/My_projects/PC-mobile
+  cd /path/to/Linkable
   ./scripts/setup_desktop_venv.sh
   source ./scripts/desktop_env.sh
   python -m pip install -r desktop/requirements.txt -r desktop/requirements-ui.txt

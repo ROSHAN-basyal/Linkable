@@ -1,13 +1,17 @@
 package com.linkable.transfer
 
+import android.Manifest
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import androidx.annotation.RequiresApi
 import com.linkable.LinkableApp
 import com.linkable.debug.DebugEventLog
 import com.linkable.protocol.v1.FileChunk
@@ -179,6 +183,7 @@ class FileTransferReceiver(
         return fallbackFile.absolutePath
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun insertIntoPublicDownloads(transfer: ActiveFileTransfer, folder: String): Uri {
         val values = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, transfer.finalFile.name)
@@ -280,6 +285,14 @@ class FileTransferReceiver(
     }
 
     private fun showTransferNotification(title: String, body: String) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            DebugEventLog.record("transfer", "Transfer notification skipped: notification permission missing")
+            return
+        }
         runCatching {
             val notification = NotificationCompat.Builder(context, LinkableApp.CONNECTION_CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.stat_sys_upload_done)

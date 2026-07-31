@@ -8,10 +8,14 @@ __pycache__/
 
 # Generated protocol outputs
 /protocol/generated/
+/dist/
 
 # Desktop local state
 /desktop/.venv/
 /desktop/.mypy_cache/
+/desktop/packaging/pkg/
+/desktop/packaging/src/
+/desktop/packaging/*.pkg.tar.*
 
 # Android / Gradle
 /android/.gradle/
@@ -19,6 +23,10 @@ __pycache__/
 /android/app/build/
 /android/local.properties
 /.gradle-session/
+*.jks
+*.keystore
+*.p12
+*.pfx
 
 # IDEs
 .idea/
