@@ -1,5 +1,9 @@
 # Linkable
 
+<p align="center">
+  <img src="Icons/linkable-app-icon.png" alt="Linkable app icon" width="128">
+</p>
+
 Linkable connects an Android phone to a Linux desktop over a local network. It
 provides encrypted pairing and reconnect, notification mirroring and replies,
 call controls, file transfer and browsing, phone ringing, contacts and dialing,

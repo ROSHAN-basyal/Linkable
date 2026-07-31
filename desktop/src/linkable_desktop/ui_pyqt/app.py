@@ -32,6 +32,7 @@ def main(argv: list[str] | None = None) -> int:
 
 def _run_gui() -> int:
     from PyQt6.QtCore import Qt
+    from PyQt6.QtGui import QIcon
     from PyQt6.QtWidgets import QApplication
 
     from linkable_desktop.app.setup_state import load_first_run_state
@@ -44,6 +45,9 @@ def _run_gui() -> int:
     QApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeMenuBar, True)
     app = QApplication(sys.argv)
     app.setApplicationName("Linkable")
+    app_icon = ROOT_DIR / "Icons" / "linkable-app-icon.png"
+    if app_icon.exists():
+        app.setWindowIcon(QIcon(str(app_icon)))
     app.setStyleSheet(build_stylesheet())
     background_service_paused = _pause_background_service_for_gui()
 

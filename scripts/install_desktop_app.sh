@@ -4,15 +4,22 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 TEMPLATE="${ROOT_DIR}/desktop/packaging/linkable.desktop.in"
-APP_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
+DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
+APP_DIR="${DATA_HOME}/applications"
 APP_FILE="${APP_DIR}/linkable.desktop"
+ICON_THEME_DIR="${DATA_HOME}/icons/hicolor"
+ICON_FILE="${ICON_THEME_DIR}/512x512/apps/linkable.png"
 
 mkdir -p "${APP_DIR}"
 sed "s|@ROOT_DIR@|${ROOT_DIR}|g" "${TEMPLATE}" > "${APP_FILE}"
 chmod 0644 "${APP_FILE}"
+install -Dm644 "${ROOT_DIR}/Icons/linkable-app-icon.png" "${ICON_FILE}"
 
 if command -v update-desktop-database >/dev/null 2>&1; then
   update-desktop-database "${APP_DIR}" >/dev/null 2>&1 || true
+fi
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache -f -t "${ICON_THEME_DIR}" >/dev/null 2>&1 || true
 fi
 
 rm -f "${XDG_CONFIG_HOME:-${HOME}/.config}/autostart/linkable.desktop"
@@ -38,8 +45,8 @@ WantedBy=default.target
 EOF
   systemctl --user daemon-reload || true
   systemctl --user enable --now linkable-desktop.service
-  echo "Installed Linkable launcher and background-only systemd user service."
+  echo "Installed Linkable launcher, app icon, and background-only systemd user service."
 else
-  echo "Installed Linkable launcher at ${APP_FILE}."
+  echo "Installed Linkable launcher at ${APP_FILE} and icon at ${ICON_FILE}."
   echo "Run again with --autostart to start only the background LAN service after login."
 fi

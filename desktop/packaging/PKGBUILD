@@ -42,6 +42,8 @@ package() {
     "${target}/scripts/setup_linkable_camera.sh"
   install -Dm644 "${root}/README.md" "${target}/README.md"
   install -Dm644 "${root}/LICENSE" "${target}/LICENSE"
+  install -Dm644 "${root}/Icons/linkable-app-icon.png" \
+    "${pkgdir}/usr/share/icons/hicolor/512x512/apps/linkable.png"
 
   install -d "${pkgdir}/usr/bin"
   cat > "${pkgdir}/usr/bin/linkable-desktop" <<'EOF'
