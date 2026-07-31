@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Linkable
+Comment=LAN companion for Android notifications, files, calls, and mirroring
+Exec=@ROOT_DIR@/scripts/run_desktop_gui.sh
+Path=@ROOT_DIR@
+Icon=smartphone
+Terminal=false
+Categories=Network;Utility;
+StartupNotify=true

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+.venv-desktop/
+
+# Generated protocol outputs
+/protocol/generated/
+
+# Desktop local state
+/desktop/.venv/
+/desktop/.mypy_cache/
+
+# Android / Gradle
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/local.properties
+/.gradle-session/
+
+# IDEs
+.idea/
+.vscode/
+.codex
+
+# OS / editor noise
+*.swp
+*.swo
+.DS_Store

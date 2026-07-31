@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "InputProto";
+
+import "common.proto";
+
+enum DesktopInputActionType {
+  DESKTOP_INPUT_ACTION_TYPE_UNSPECIFIED = 0;
+  DESKTOP_INPUT_ACTION_TYPE_TEXT = 1;
+  DESKTOP_INPUT_ACTION_TYPE_KEY_COMBO = 2;
+  DESKTOP_INPUT_ACTION_TYPE_POINTER_MOVE = 3;
+  DESKTOP_INPUT_ACTION_TYPE_POINTER_CLICK = 4;
+  DESKTOP_INPUT_ACTION_TYPE_POINTER_SCROLL = 5;
+  DESKTOP_INPUT_ACTION_TYPE_VOLUME_SET = 6;
+  DESKTOP_INPUT_ACTION_TYPE_MIC_MUTE_SET = 7;
+}
+
+message DesktopInputRequest {
+  string request_id = 1;
+  DesktopInputActionType action_type = 2;
+  string text = 3;
+  repeated string key_combo = 4;
+  int32 pointer_dx = 5;
+  int32 pointer_dy = 6;
+  int32 pointer_button = 7;
+  int32 scroll_y = 8;
+  int32 volume_percent = 9;
+  bool mic_muted = 10;
+  Timestamp sent_at = 11;
+}
+
+message DesktopInputResult {
+  string request_id = 1;
+  bool success = 2;
+  string detail = 3;
+  Timestamp completed_at = 4;
+}

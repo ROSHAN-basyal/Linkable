@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "FilesProto";
+
+import "common.proto";
+
+message FileOffer {
+  string transfer_id = 1;
+  string file_name = 2;
+  uint64 size_bytes = 3;
+  string sha256_hex = 4;
+  string mime_type = 5;
+  uint32 chunk_size = 6;
+  Timestamp offered_at = 7;
+}
+
+message FileChunk {
+  string transfer_id = 1;
+  uint64 offset = 2;
+  bytes data = 3;
+}
+
+message FileComplete {
+  string transfer_id = 1;
+  string sha256_hex = 2;
+}
+
+message FileTransferResult {
+  string transfer_id = 1;
+  bool success = 2;
+  string detail = 3;
+  string saved_path = 4;
+  uint64 bytes_received = 5;
+  Timestamp completed_at = 6;
+}

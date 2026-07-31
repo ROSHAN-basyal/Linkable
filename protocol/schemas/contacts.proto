@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "ContactsProto";
+
+import "common.proto";
+
+message PhoneContact {
+  string contact_id = 1;
+  string display_name = 2;
+  string phone_number = 3;
+  string label = 4;
+  int64 last_interaction_epoch_ms = 5;
+}
+
+message PhoneContactsRequest {
+  string request_id = 1;
+  string query = 2;
+  uint32 limit = 3;
+  Timestamp requested_at = 4;
+}
+
+message PhoneContactsResponse {
+  string request_id = 1;
+  bool success = 2;
+  string detail = 3;
+  repeated PhoneContact contacts = 4;
+  Timestamp completed_at = 5;
+}
+
+message PhoneRecentContactsRequest {
+  string request_id = 1;
+  uint32 limit = 2;
+  Timestamp requested_at = 3;
+}
+
+message PhoneRecentContactsResponse {
+  string request_id = 1;
+  bool success = 2;
+  string detail = 3;
+  repeated PhoneContact contacts = 4;
+  Timestamp completed_at = 5;
+}

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "ErrorsProto";
+
+import "common.proto";
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+
+  ERROR_CODE_PROTOCOL_VERSION_MISMATCH = 1001;
+  ERROR_CODE_INVALID_PACKET_TYPE = 1002;
+  ERROR_CODE_MALFORMED_PAYLOAD = 1003;
+  ERROR_CODE_SEQUENCE_REPLAY = 1004;
+  ERROR_CODE_SEQUENCE_GAP = 1005;
+
+  ERROR_CODE_PAIRING_NOT_ALLOWED = 2001;
+  ERROR_CODE_PAIRING_TIMEOUT = 2002;
+  ERROR_CODE_PAIRING_CODE_MISMATCH = 2003;
+  ERROR_CODE_TRUST_NOT_FOUND = 2004;
+
+  ERROR_CODE_SESSION_NOT_ESTABLISHED = 3001;
+  ERROR_CODE_SESSION_SIGNATURE_INVALID = 3002;
+  ERROR_CODE_SESSION_KEY_ROTATION_REQUIRED = 3003;
+  ERROR_CODE_HEARTBEAT_TIMEOUT = 3004;
+
+  ERROR_CODE_INTERNAL_FAILURE = 9001;
+}
+
+message ErrorPayload {
+  ErrorCode code = 1;
+  string message = 2;
+  bool fatal = 3;
+  PacketType related_packet_type = 4;
+  uint64 related_sequence_number = 5;
+}
+

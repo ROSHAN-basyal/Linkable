@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "StorageProto";
+
+import "common.proto";
+
+message PhoneFileEntry {
+  string name = 1;
+  string path = 2;
+  bool directory = 3;
+  uint64 size_bytes = 4;
+  string mime_type = 5;
+  int64 modified_epoch_ms = 6;
+}
+
+message PhoneFileListRequest {
+  string request_id = 1;
+  string path = 2;
+  Timestamp requested_at = 3;
+}
+
+message PhoneFileListResponse {
+  string request_id = 1;
+  string path = 2;
+  bool success = 3;
+  string detail = 4;
+  repeated PhoneFileEntry entries = 5;
+  Timestamp completed_at = 6;
+}
+
+message PhoneFilePullRequest {
+  string request_id = 1;
+  string path = 2;
+  Timestamp requested_at = 3;
+}
+
+message PhoneFilePullResult {
+  string request_id = 1;
+  string path = 2;
+  bool success = 3;
+  string detail = 4;
+  Timestamp completed_at = 5;
+}

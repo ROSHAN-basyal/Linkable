@@ -1,0 +1,37 @@
+# Maintainer: rsnb
+pkgname=linkable-desktop
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Linux desktop companion for Linkable phone integration"
+arch=("any")
+license=("MIT")
+depends=(
+  "python"
+  "python-pyqt6"
+  "python-protobuf"
+  "python-zeroconf"
+  "python-cryptography"
+  "android-tools"
+  "scrcpy"
+  "libnotify"
+  "pipewire-pulse"
+)
+optdepends=(
+  "firewalld: firewall setup helper"
+  "ufw: alternate firewall setup helper"
+  "avahi: mDNS advertisement backend"
+  "ydotool: future keyboard and pointer relay"
+)
+makedepends=("python-build" "python-installer" "python-wheel")
+source=("$pkgname::file://${startdir}/../..")
+sha256sums=("SKIP")
+
+build() {
+  cd "$srcdir/linkable-desktop/desktop"
+  python -m build --wheel --no-isolation
+}
+
+package() {
+  cd "$srcdir/linkable-desktop/desktop"
+  python -m installer --destdir="$pkgdir" dist/*.whl
+}

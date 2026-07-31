@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "SessionProto";
+
+import "common.proto";
+
+message SessionInit {
+  PeerDescriptor initiator = 1;
+  bytes ephemeral_public_key = 2;
+  bytes identity_signature = 3;
+  Timestamp issued_at = 4;
+}
+
+message SessionAck {
+  PeerDescriptor acceptor = 1;
+  bytes ephemeral_public_key = 2;
+  bytes identity_signature = 3;
+  Timestamp issued_at = 4;
+}
+
+message SessionRotate {
+  Role requested_by = 1;
+  bytes next_ephemeral_public_key = 2;
+  uint64 rotation_epoch = 3;
+  bytes identity_signature = 4;
+}
+
+enum SessionCloseReason {
+  SESSION_CLOSE_REASON_UNSPECIFIED = 0;
+  SESSION_CLOSE_REASON_NORMAL = 1;
+  SESSION_CLOSE_REASON_TIMEOUT = 2;
+  SESSION_CLOSE_REASON_REVOKED = 3;
+  SESSION_CLOSE_REASON_PROTOCOL_ERROR = 4;
+  SESSION_CLOSE_REASON_TRANSPORT_ERROR = 5;
+}
+
+message SessionClose {
+  SessionCloseReason reason = 1;
+  string detail = 2;
+}
+

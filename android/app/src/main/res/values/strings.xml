@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Linkable</string>
+    <string name="connection_channel_name">Linkable connection</string>
+    <string name="connection_channel_description">Connection status and future foreground-session notifications.</string>
+    <string name="connection_notification_title">Linkable active</string>
+</resources>

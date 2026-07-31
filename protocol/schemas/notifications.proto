@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "NotificationsProto";
+
+import "common.proto";
+
+enum NotificationActionSemantic {
+  NOTIFICATION_ACTION_SEMANTIC_UNSPECIFIED = 0;
+  NOTIFICATION_ACTION_SEMANTIC_REPLY = 1;
+  NOTIFICATION_ACTION_SEMANTIC_ANSWER_CALL = 2;
+  NOTIFICATION_ACTION_SEMANTIC_DECLINE_CALL = 3;
+  NOTIFICATION_ACTION_SEMANTIC_HANG_UP_CALL = 4;
+  NOTIFICATION_ACTION_SEMANTIC_OPEN = 5;
+}
+
+message NotificationAction {
+  string action_id = 1;
+  string title = 2;
+  bool supports_remote_input = 3;
+  bool supports_plain_intent = 4;
+  NotificationActionSemantic semantic = 5;
+}
+
+message NotificationPosted {
+  string notification_id = 1;
+  string package_name = 2;
+  string app_name = 3;
+  string title = 4;
+  string body = 5;
+  string channel_id = 6;
+  string category = 7;
+  bool ongoing = 8;
+  bool silent = 9;
+  Timestamp posted_at = 10;
+  repeated NotificationAction actions = 11;
+  bool call_like = 12;
+  string call_state_hint = 13;
+  bytes app_icon_png = 14;
+  string app_icon_mime = 15;
+}
+
+message NotificationRemoved {
+  string notification_id = 1;
+  string package_name = 2;
+  Timestamp removed_at = 3;
+}
+
+message NotificationReplyRequest {
+  string request_id = 1;
+  string notification_id = 2;
+  string action_id = 3;
+  string reply_text = 4;
+}
+
+message NotificationReplyResult {
+  string request_id = 1;
+  string notification_id = 2;
+  string action_id = 3;
+  bool success = 4;
+  string detail = 5;
+  Timestamp completed_at = 6;
+}
+
+message NotificationActionRequest {
+  string request_id = 1;
+  string notification_id = 2;
+  string action_id = 3;
+  Timestamp requested_at = 4;
+}
+
+message NotificationActionResult {
+  string request_id = 1;
+  string notification_id = 2;
+  string action_id = 3;
+  bool success = 4;
+  string detail = 5;
+  Timestamp completed_at = 6;
+}

@@ -1,0 +1,127 @@
+# Codex1 Change Log
+
+This file records implementation changes made by this Codex session.
+
+## 2026-05-29
+
+- Analyzed the Linux desktop implementation prompt and continued the requested first slice: startup compatibility check, first-run setup, and Devices panel.
+- Hardened the new PyQt6 Devices panel so device management actions are revealed by selecting a device card instead of always being visible.
+- Added selected-card styling through theme/object names, keeping widget code free of hardcoded colors.
+- Moved PyQt6 widget sizing and spacing usage toward named theme constants in `desktop/src/linkable_desktop/ui_pyqt/theme.py`.
+- Replaced inline widget style snippets in the startup checker, first-run wizard, main window, and Devices panel with object names backed by the theme stylesheet.
+- Fixed the stale Android direct-connect unit test to expect the current Linkable default port `37891` instead of the old `7734`.
+- Verified desktop compile: `python -m compileall -q desktop/src/linkable_desktop/app desktop/src/linkable_desktop/ui_pyqt desktop/tests`.
+- Verified desktop tests: `python -m unittest discover -s desktop/tests` passed with 30 tests.
+- Verified Android unit tests: Gradle `testDebugUnitTest` passed.
+- Verified aggregate repo tests: `./scripts/run_tests.sh` passed.
+- Investigated desktop UI startup on the real session after the user reported the window did not work.
+- Found `linkable-desktop.service` was already running and occupying TCP `37891`, preventing a foreground GUI from starting its listener.
+- Updated `scripts/run_desktop_gui.sh` so foreground launches stop the user service first; `--background-service` remains unchanged.
+- Removed a stale `_pcmobile._tcp` Avahi advertiser process on old port `7734` from the live session.
+- Changed the firewalld compatibility check to avoid `firewall-cmd` startup queries that can trigger a short-lived Polkit/sudo password prompt.
+- Updated the compatibility gate so non-critical-only failures expose an enabled `Continue anyway` action.
+- Verified the foreground desktop launcher starts under the current display session and desktop unit tests still pass.
+- Removed all firewall command execution from the PyQt6 startup compatibility check; firewall tools are now detected with `shutil.which` only, and sudo commands remain copyable text only.
+- Changed GUI startup so optional/non-critical compatibility warnings do not block the main UI.
+- Added visible Devices-panel feedback for Pair, Disconnect, Allow reconnect, and Unpair actions.
+- Enabled sidebar items to respond with an explanatory message instead of appearing as dead controls while those panels are still being migrated.
+- Relaunched the desktop app and verified it now owns TCP `37891` and advertises `_linkable._tcp` without spawning firewall or sudo-related commands.
+- Diagnosed the remaining discovery/connectivity problem by reading firewalld XML directly: `/etc/firewalld/zones/public.xml` allowed old TCP `7734`, not new TCP `37891`.
+- Added local Linkable config at `~/.config/linkable/config.json` with `service_port` set to `7734`, avoiding any sudo/firewall mutation while using the already-open port.
+- Relaunched the desktop app and verified it listens on `0.0.0.0:7734` and advertises `_linkable._tcp` with `host=192.168.1.65` and `port=7734`.
+- Removed the dark status-chip styling under the Devices header and made the Devices scroll area/content explicitly transparent.
+- Re-ran desktop tests after the UI changes; all 30 tests passed.
+- Changed Android Safe Wi-Fi policy to default to "allow pairing on all Wi-Fi" so background LAN reconnect does not depend on Android SSID/location access.
+- Moved Android Safe Wi-Fi into a dedicated screen opened from the Safe Wi-Fi action, with back navigation, refresh, an allow-all toggle, current Wi-Fi display, and per-network toggles.
+- Changed Android location access so it is requested only when the user turns off "Allow pairing on all Wi-Fi" for strict Safe Wi-Fi mode.
+- Added Android strict-mode pairing protection: when Safe Wi-Fi is enabled and the current SSID cannot be read, new pairing is blocked until Location permission is granted and Wi-Fi is connected.
+- Added desktop Safe Wi-Fi persistence in `~/.config/linkable/desktop_safe_wifi.json`, with allow-all enabled by default, current-SSID detection through non-privileged commands, and per-SSID toggles.
+- Added a desktop Safe Wi-Fi card to the Devices panel and wired it to the backend policy without sudo, firewall, or Polkit prompts.
+- Added a desktop Refresh button to the main status row that restarts the runtime listener and mDNS advertisement.
+- Migrated the new PyQt6 desktop shell beyond the Devices-only state: Notifications, Files, Mirror, and Call Audio panels now call real runtime/backend methods instead of showing pending messages.
+- Added desktop runtime queues for file send, ring phone, call control, dialing, telephony diagnostics, notification replies, and notification actions.
+- Added desktop notification storage so mirrored phone notifications can be listed and acted on from the new PyQt6 UI.
+- Added desktop mirror controls backed by the existing `ScrcpyManager`, including USB launch and LAN launch using the connected phone IP from the trusted session.
+- Added desktop call/audio controls backed by existing protobuf command queues and user-level `wpctl`/`pactl` volume commands.
+- Built and installed the updated Android debug APK on attached device `001966566001213`.
+- Verified desktop Python compilation for the modified runtime/UI files.
+- Verified desktop unit tests: `python -m unittest discover -s desktop/tests` passed with 30 tests.
+- Verified Android unit tests: Gradle `testDebugUnitTest` passed.
+- Verified aggregate repo tests: `./scripts/run_tests.sh` passed.
+- Relaunched the desktop app and verified it is listening on `0.0.0.0:7734` and advertising `_linkable._tcp` on `wlan0` with `host=192.168.1.65` and `port=7734`.
+- Added protobuf protocol support for shared app shortcuts and lazy phone filesystem browsing: `apps.proto`, `storage.proto`, and packet IDs `8601-8603` plus `8701-8704`.
+- Regenerated Python and Android Java Lite protobuf bindings and updated the desktop packet decoder.
+- Added Android installed-app/shared-app state with launchable-app discovery, per-app shared toggles, icon PNG export, and desktop-originated app launch handling.
+- Added Android per-PC management state: selecting a trusted PC now exposes toggles for notifications/messages, file sharing, storage browsing, calls, and shared apps.
+- Added Android enforcement for the per-PC toggles in the encrypted session loop, including blocking notification forwarding, call controls/metadata, file transfers, storage browsing, and shared-app launch when disabled.
+- Added Android lazy storage browsing responder for desktop list/pull requests, restricted to external storage and guarded by the per-PC storage/file toggles.
+- Added Android storage-permission prompting from the selected-PC management area when broad storage access is needed for browsing.
+- Removed the mobile Quick Actions refresh button and More/Less button, and removed the top-app refresh action.
+- Hid the battery-optimization explainer/button once unrestricted battery access is already granted.
+- Added desktop runtime queues/state for shared-app launches, phone file listing requests, and phone file pull requests.
+- Replaced the desktop Shared Apps placeholder with a real panel grouped by category, rendering Android app icons and queuing launch requests.
+- Changed desktop shared-app launch so clicking a shortcut attempts USB scrcpy first, falls back to LAN scrcpy, then queues the Android app launch request.
+- Extended the desktop Files panel with a phone filesystem browser that lazily requests folder listings and pulls selected files from the phone into the existing desktop receive path.
+- Updated protocol documentation packet registry and verified `scripts/validate_milestone_1.py` passes.
+- Verified desktop Python compilation for modified protocol/runtime/UI files.
+- Verified desktop unit tests: `python -m unittest discover -s desktop/tests` passed with 30 tests.
+- Verified Android unit tests and aggregate tests: `./scripts/run_tests.sh` passed.
+- Rebuilt and installed the updated Android debug APK on attached device `001966566001213`.
+- Relaunched the desktop app after the final shared-app launch adjustment and verified it is still listening on `0.0.0.0:7734` with `_linkable._tcp` advertisement on `192.168.1.65:7734`.
+- Restored the Android top-bar `Refresh` action while keeping Refresh removed from the mobile Quick Actions grid.
+- Removed the Android home-screen UI cards below `Trusted PCs`; PC-specific permissions and shared-app toggles now open in the selected trusted-PC detail screen instead of expanding under the list.
+- Added Android per-PC `Contact sharing` permission storage and UI toggle.
+- Added Android contacts/call-log permission request flow and implemented encrypted protocol handling for desktop contact search and recent-contact requests.
+- Added the `PhoneContactsProvider` backend for Android contact search and last-20 recent call/contact export, guarded by runtime permissions and the per-PC contact-sharing toggle.
+- Added contacts protobuf packet documentation for IDs `8801-8804` and verified protocol generation/registry validation.
+- Changed the desktop runtime so heartbeat messages no longer rebuild the Devices panel or repeatedly fetch recent contacts, fixing the automatic blink/repaint behavior.
+- Renamed the desktop Settings nav item to `Phone Call` and replaced the old call-audio block with a light-themed phone-call panel: Android-style dial pad, separate `Dial SIM 1` and `Dial SIM 2` buttons, contact search, search results, last-20 recent contacts, call controls, and audio sliders.
+- Wired desktop contact search to request matches from the connected phone only when the search text is non-empty; recent contacts are requested automatically when a phone first connects.
+- Added desktop contact status updates while search/recent-contact requests are queued so the Phone Call panel does not look idle while waiting for the phone response.
+- Connected the desktop contact-response signal to the PyQt panel refresh path so search results and recents update without restarting the UI.
+- Added hardware keyboard dialing to the desktop Phone Call tab: number keys, `*`, `#`, `+`, backspace, delete/escape, Enter for SIM 1, F1/F2, and Ctrl/Alt/Meta+1/2 for SIM selection now drive the dialer without clicking the on-screen pad.
+- Kept the contact search field excluded from keyboard-dial capture so typing a contact query does not also append digits to the dialer.
+- Fixed a bad keyboard-hook placement caught during GUI restart, then relaunched the desktop GUI and verified it listens on `0.0.0.0:7734` with `_linkable._tcp` advertising.
+- Removed remaining dark text-field/plain-text styling from the desktop theme path by styling editor widgets and scroll contents from named theme constants.
+- Reworked the desktop phone file browser from cramped inline rows into a readable table/tree view with `Name`, `Type`, `Size`, and `Modified` columns.
+- Added a dedicated Phone browser card with Root, Up, Refresh folder, selected-folder open, and selected-file copy actions.
+- Added readable current-folder/status display for phone browsing and immediate queued/blocked status updates when no phone is connected.
+- Styled the phone file tree and path label through named desktop theme selectors so folder/file names are visible against the light UI.
+- Removed the old phone file row widget that squeezed names beside metadata/actions.
+- Reworked the Files tab into a cleaner two-pane file-manager layout: a large phone-storage browser pane on the left and a compact Transfers/Received pane on the right.
+- Added a file-explorer-style location/address bar with `Go`, plus `Root`, `Up`, and `Refresh folder` controls above the phone file table.
+- Increased the phone file table's minimum working height, row height, and font size so file/folder names get the primary display space.
+- Added platform folder/file icons to phone storage rows and made Enter/double-click activate the selected folder/file.
+- Moved `Send file to phone` and `Open received folder` out of the phone-browser toolbar into the right-side transfer pane to reduce clutter while browsing.
+- Added splitter styling for the Files workspace and a path-input theme selector.
+- Verified desktop Python compilation for the modified runtime/UI/theme files.
+- Verified desktop unit tests: `python -m unittest discover -s desktop/tests` passed with 30 tests.
+- Verified aggregate repo tests: `./scripts/run_tests.sh` passed.
+- Relaunched the desktop GUI and verified it is listening on `0.0.0.0:7734` with `_linkable._tcp` advertising.
+- Removed the Android Quick Actions `Notify` button so notification listener settings are no longer exposed as a regular quick action.
+- Added a top warning card when Android notification listener access is missing, with a direct button to open notification access settings for notification read/reply/control permission.
+- Added a Quick Actions `Notice Blocklist` button that opens a dedicated screen with a searchable app list and per-app forwarding toggle.
+- Added persistent `NotificationBlocklistStore` and extended installed-app UI state with `notificationBlocked`.
+- Enforced the Notice Blocklist inside `PhoneNotificationListener`, removing stored actions and publishing removal when a previously forwarded app becomes blocked.
+- Added Android notification listener access detection in `DiscoveryViewModel` based on enabled notification listener components.
+- Verified Android `testDebugUnitTest` passed.
+- Verified aggregate repo tests: `./scripts/run_tests.sh` passed.
+- Built, installed, and launched the updated Android debug APK on device `001966566001213`.
+- Verified Python imports/compilation for modified desktop runtime, pairing server, PyQt panels, main window, app launcher, and proto mapping.
+- Verified desktop unit tests: `python -m unittest discover -s desktop/tests` passed with 30 tests.
+- Verified Android unit tests: Gradle `testDebugUnitTest` passed.
+- Verified aggregate repo tests: `./scripts/run_tests.sh` passed.
+- Rebuilt and installed the updated Android debug APK on attached device `001966566001213`, then launched `com.linkable` and verified it has a live process.
+- Relaunched the desktop GUI detached and verified it is listening on `0.0.0.0:7734` and advertising `_linkable._tcp` on `wlan0` with `host=192.168.1.65` and `port=7734`.
+- Changed Android Quick Actions `PC Ctrl` from an inline/hidden card toggle into a dedicated full-screen `PC Control` tab with top-bar back navigation.
+- Added the Android PC Control surface: large touchpad area, one-finger relative pointer movement, two-finger scroll forwarding, left-click and right-click buttons, speaker mute/volume control, mic mute toggle, and bottom live-keyboard launcher.
+- Added live keyboard forwarding from Android to desktop, including incremental text sends and Backspace key-combo events when the typed text is deleted.
+- Added Android ViewModel plumbing for desktop key-combo requests so keyboard deletes can travel through the existing encrypted desktop-input protocol.
+- Updated the desktop input backend to send ydotool key combos as explicit press/release events, making Backspace and modifier combos usable from the phone keyboard.
+- Added a desktop startup compatibility check for the `ydotool`/`ydotoold` backend so PC Control failures are surfaced with install/daemon commands instead of silently making phone controls look broken.
+- Added desktop unit coverage for ydotool key-combo press/release command generation.
+- Verified Android `testDebugUnitTest` passed.
+- Verified targeted desktop input tests passed: `source ./scripts/desktop_env.sh && PYTHONPATH=desktop/src python -m unittest desktop.tests.test_input_control`.
+- Verified aggregate repo tests: `./scripts/run_tests.sh` passed.
+- Built and installed the updated Android debug APK on attached device `001966566001213`.
+- Launched `com.linkable` on the device, verified the app process is live, tapped `PC Ctrl`, and confirmed through UIAutomator that the `PC Control`, `Touchpad`, left/right click, mute/mic controls, live keyboard button, and `Type to PC` input field render.

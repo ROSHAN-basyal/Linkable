@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "CameraProto";
+
+import "common.proto";
+
+enum CameraRoute {
+  CAMERA_ROUTE_UNSPECIFIED = 0;
+  CAMERA_ROUTE_LAN = 1;
+  CAMERA_ROUTE_USB = 2;
+}
+
+enum CameraFacing {
+  CAMERA_FACING_UNSPECIFIED = 0;
+  CAMERA_FACING_FRONT = 1;
+  CAMERA_FACING_BACK = 2;
+}
+
+enum CameraCodec {
+  CAMERA_CODEC_UNSPECIFIED = 0;
+  CAMERA_CODEC_MJPEG = 1;
+  CAMERA_CODEC_H264 = 2;
+}
+
+enum CameraFocusMode {
+  CAMERA_FOCUS_MODE_UNSPECIFIED = 0;
+  CAMERA_FOCUS_MODE_AUTO = 1;
+  CAMERA_FOCUS_MODE_CONTINUOUS_VIDEO = 2;
+  CAMERA_FOCUS_MODE_CONTINUOUS_PICTURE = 3;
+  CAMERA_FOCUS_MODE_FIXED = 4;
+  CAMERA_FOCUS_MODE_INFINITY = 5;
+  CAMERA_FOCUS_MODE_MACRO = 6;
+}
+
+message CameraProfile {
+  uint32 width = 1;
+  uint32 height = 2;
+  uint32 fps = 3;
+  CameraCodec codec = 4;
+  string label = 5;
+}
+
+message CameraDeviceCapability {
+  string camera_id = 1;
+  CameraFacing facing = 2;
+  bool flash_available = 3;
+  repeated string focus_modes = 4;
+  repeated CameraProfile profiles = 5;
+}
+
+message CameraCapabilityRequest {
+  string request_id = 1;
+  Timestamp requested_at = 2;
+}
+
+message CameraCapabilityResponse {
+  string request_id = 1;
+  bool success = 2;
+  string detail = 3;
+  bool camera_permission_granted = 4;
+  bool camera_share_enabled = 5;
+  repeated CameraDeviceCapability cameras = 6;
+  Timestamp completed_at = 7;
+}
+
+message CameraStreamStartRequest {
+  string request_id = 1;
+  CameraRoute route = 2;
+  CameraFacing facing = 3;
+  CameraCodec codec = 4;
+  uint32 width = 5;
+  uint32 height = 6;
+  uint32 fps = 7;
+  uint32 jpeg_quality = 8;
+  string endpoint_host = 9;
+  uint32 endpoint_port = 10;
+  string session_token = 11;
+  uint32 ack_interval_ms = 12;
+  uint32 ack_timeout_ms = 13;
+  Timestamp requested_at = 14;
+}
+
+message CameraStreamStartResult {
+  string request_id = 1;
+  bool success = 2;
+  string detail = 3;
+  CameraRoute route = 4;
+  CameraFacing facing = 5;
+  CameraCodec codec = 6;
+  uint32 width = 7;
+  uint32 height = 8;
+  uint32 fps = 9;
+  string endpoint_host = 10;
+  uint32 endpoint_port = 11;
+  string session_token = 12;
+  Timestamp started_at = 13;
+}
+
+message CameraStreamAck {
+  string request_id = 1;
+  string session_token = 2;
+  Timestamp sent_at = 3;
+}
+
+message CameraStreamStopRequest {
+  string request_id = 1;
+  string session_token = 2;
+  string reason = 3;
+  Timestamp requested_at = 4;
+}
+
+message CameraStreamStopResult {
+  string request_id = 1;
+  string session_token = 2;
+  bool success = 3;
+  string detail = 4;
+  Timestamp stopped_at = 5;
+}
+
+message CameraStreamStatusEvent {
+  string session_token = 1;
+  bool active = 2;
+  string detail = 3;
+  uint64 frames_sent = 4;
+  Timestamp generated_at = 5;
+}
+
+message CameraFrame {
+  string session_token = 1;
+  uint64 frame_sequence = 2;
+  CameraCodec codec = 3;
+  uint32 width = 4;
+  uint32 height = 5;
+  bytes frame_bytes = 6;
+  Timestamp captured_at = 7;
+}

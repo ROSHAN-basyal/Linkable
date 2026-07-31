@@ -1,0 +1,100 @@
+QMainWindow, QWidget {
+    background: #101820;
+    color: #e9f1ef;
+    font-size: 14px;
+}
+
+QScrollArea {
+    background: transparent;
+    border: 0;
+}
+
+QLabel#HeroTitle {
+    color: #f4f7f5;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+QLabel#InfoText {
+    color: #b8c9c5;
+    line-height: 140%;
+}
+
+QLabel#SectionLabel {
+    color: #8fe8c1;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 6px;
+}
+
+QLabel#StatusChip {
+    border-radius: 12px;
+    padding: 6px 12px;
+    background: #20313a;
+    color: #a7f3d0;
+    font-weight: 700;
+}
+
+QGroupBox {
+    border: 1px solid #29414b;
+    border-radius: 16px;
+    margin-top: 16px;
+    padding: 16px;
+    background: #14232b;
+}
+
+QGroupBox::title {
+    color: #8fe8c1;
+    subcontrol-origin: margin;
+    left: 14px;
+    padding: 0 8px;
+}
+
+QPushButton {
+    background: #20c997;
+    color: #07140f;
+    border: 0;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-weight: 700;
+}
+
+QPushButton:hover {
+    background: #34dba8;
+}
+
+QPushButton:disabled {
+    background: #344850;
+    color: #93a2a8;
+}
+
+QPushButton#DangerButton {
+    background: #ff6b6b;
+    color: #1b0808;
+}
+
+QLineEdit, QTextEdit, QListWidget {
+    background: #0b1419;
+    border: 1px solid #29414b;
+    border-radius: 10px;
+    padding: 8px;
+    color: #e9f1ef;
+    selection-background-color: #20c997;
+}
+
+QTextEdit {
+    font-family: "JetBrains Mono", "DejaVu Sans Mono", monospace;
+    font-size: 12px;
+}
+
+QSplitter#MainSplitter::handle {
+    background: #20313a;
+    border-radius: 4px;
+    margin: 4px;
+}
+
+QSplitter#MainSplitter::handle:hover {
+    background: #20c997;
+}

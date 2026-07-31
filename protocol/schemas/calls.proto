@@ -1,0 +1,176 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "CallsProto";
+
+import "common.proto";
+
+enum PhoneCallState {
+  PHONE_CALL_STATE_UNSPECIFIED = 0;
+  PHONE_CALL_STATE_IDLE = 1;
+  PHONE_CALL_STATE_RINGING = 2;
+  PHONE_CALL_STATE_OFFHOOK = 3;
+}
+
+enum CallControlAction {
+  CALL_CONTROL_ACTION_UNSPECIFIED = 0;
+  CALL_CONTROL_ACTION_ACCEPT = 1;
+  CALL_CONTROL_ACTION_REJECT = 2;
+  CALL_CONTROL_ACTION_HANGUP = 3;
+}
+
+enum CallDirection {
+  CALL_DIRECTION_UNSPECIFIED = 0;
+  CALL_DIRECTION_INCOMING = 1;
+  CALL_DIRECTION_OUTGOING = 2;
+  CALL_DIRECTION_ACTIVE = 3;
+}
+
+enum CallSourceType {
+  CALL_SOURCE_TYPE_UNSPECIFIED = 0;
+  CALL_SOURCE_TYPE_SIM_TELEPHONY = 1;
+  CALL_SOURCE_TYPE_ANDROID_TELECOM_APP = 2;
+  CALL_SOURCE_TYPE_NOTIFICATION_INFERRED_APP = 3;
+}
+
+enum PhoneRingerMode {
+  PHONE_RINGER_MODE_UNSPECIFIED = 0;
+  PHONE_RINGER_MODE_SILENT = 1;
+  PHONE_RINGER_MODE_VIBRATE = 2;
+  PHONE_RINGER_MODE_NORMAL = 3;
+}
+
+enum PhoneAudioRouteType {
+  PHONE_AUDIO_ROUTE_TYPE_UNSPECIFIED = 0;
+  PHONE_AUDIO_ROUTE_TYPE_EARPIECE = 1;
+  PHONE_AUDIO_ROUTE_TYPE_SPEAKER = 2;
+  PHONE_AUDIO_ROUTE_TYPE_WIRED_HEADSET = 3;
+  PHONE_AUDIO_ROUTE_TYPE_BLUETOOTH = 4;
+  PHONE_AUDIO_ROUTE_TYPE_PHONE_DEFAULT = 5;
+}
+
+message CallStateEvent {
+  string event_id = 1;
+  PhoneCallState state = 2;
+  Timestamp occurred_at = 3;
+  bool incoming_number_available = 4;
+  string masked_number_hint = 5;
+  string detail = 6;
+}
+
+message CallMetadataEvent {
+  string event_id = 1;
+  PhoneCallState state = 2;
+  CallDirection direction = 3;
+  CallSourceType source_type = 4;
+  string source_app_package = 5;
+  string source_app_label = 6;
+  bool caller_id_available = 7;
+  string caller_id = 8;
+  string masked_caller_id = 9;
+  string display_name = 10;
+  uint32 sim_slot = 11;
+  int32 subscription_id = 12;
+  string carrier_name = 13;
+  string phone_account_id = 14;
+  bool video_call = 15;
+  PhoneAudioRouteType active_audio_route = 16;
+  string detail = 17;
+  Timestamp occurred_at = 18;
+}
+
+message CallControlRequest {
+  string request_id = 1;
+  CallControlAction action = 2;
+  Timestamp requested_at = 3;
+}
+
+message CallControlResult {
+  string request_id = 1;
+  CallControlAction action = 2;
+  bool success = 3;
+  string detail = 4;
+  Timestamp completed_at = 5;
+}
+
+message DialRequest {
+  string request_id = 1;
+  string phone_number = 2;
+  uint32 sim_slot = 3;
+  bool direct_call = 4;
+  Timestamp requested_at = 5;
+}
+
+message DialResult {
+  string request_id = 1;
+  bool success = 2;
+  string detail = 3;
+  uint32 requested_sim_slot = 4;
+  bool requested_sim_resolved = 5;
+  int32 resolved_subscription_id = 6;
+  Timestamp completed_at = 7;
+}
+
+message TelephonyDiagnosticsRequest {
+  string request_id = 1;
+  Timestamp requested_at = 2;
+}
+
+message TelephonyPermissionStatus {
+  bool read_phone_state_granted = 1;
+  bool answer_phone_calls_granted = 2;
+  bool call_phone_granted = 3;
+  bool read_call_log_granted = 4;
+}
+
+message SimStatus {
+  uint32 sim_slot = 1;
+  int32 subscription_id = 2;
+  string carrier_name = 3;
+  string display_name = 4;
+  bool active = 5;
+  bool default_voice = 6;
+  bool default_data = 7;
+  bool default_sms = 8;
+}
+
+message TelephonyDiagnosticsResult {
+  string request_id = 1;
+  TelephonyPermissionStatus permissions = 2;
+  repeated SimStatus sims = 3;
+  bool call_state_mirroring_supported = 4;
+  bool call_control_supported = 5;
+  bool direct_dial_supported = 6;
+  string android_version = 7;
+  string device_model = 8;
+  string detail = 9;
+  Timestamp generated_at = 10;
+  PhoneCapabilitySnapshot phone_capabilities = 11;
+}
+
+message PhoneCapabilitySnapshot {
+  string snapshot_id = 1;
+  TelephonyPermissionStatus permissions = 2;
+  uint32 sim_count = 3;
+  repeated SimStatus sims = 4;
+  PhoneRingerMode ringer_mode = 5;
+  int32 ring_volume = 6;
+  int32 ring_volume_max = 7;
+  int32 voice_call_volume = 8;
+  int32 voice_call_volume_max = 9;
+  bool speakerphone_on = 10;
+  bool bluetooth_sco_available = 11;
+  bool wired_headset_connected = 12;
+  PhoneAudioRouteType active_audio_route = 13;
+  bool call_state_mirroring_supported = 14;
+  bool caller_id_supported = 15;
+  bool call_control_supported = 16;
+  bool direct_dial_supported = 17;
+  bool lan_call_audio_supported = 18;
+  bool bluetooth_call_audio_recommended = 19;
+  string detail = 20;
+  Timestamp generated_at = 21;
+}

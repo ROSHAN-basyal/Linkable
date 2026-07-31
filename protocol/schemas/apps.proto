@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "AppsProto";
+
+import "common.proto";
+
+message SharedAppShortcut {
+  string package_name = 1;
+  string label = 2;
+  string category = 3;
+  bytes icon_png = 4;
+  string icon_mime = 5;
+}
+
+message SharedAppsSnapshot {
+  string snapshot_id = 1;
+  repeated SharedAppShortcut apps = 2;
+  Timestamp generated_at = 3;
+}
+
+message SharedAppLaunchRequest {
+  string request_id = 1;
+  string package_name = 2;
+  Timestamp requested_at = 3;
+}
+
+message SharedAppLaunchResult {
+  string request_id = 1;
+  string package_name = 2;
+  bool success = 3;
+  string detail = 4;
+  Timestamp completed_at = 5;
+}

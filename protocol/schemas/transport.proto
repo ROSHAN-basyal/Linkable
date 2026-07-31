@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "TransportProto";
+
+import "common.proto";
+
+message Ping {
+  string token = 1;
+  Timestamp sent_at = 2;
+}
+
+message Pong {
+  string token = 1;
+  Timestamp sent_at = 2;
+  Timestamp received_at = 3;
+}
+
+message DeviceInfoRequest {}
+
+message DeviceInfoResponse {
+  PeerDescriptor peer = 1;
+  string os_version = 2;
+  bool battery_present = 3;
+  int32 battery_percent = 4;
+  bool screen_locked = 5;
+  repeated string network_interfaces = 6;
+}
+
+message Capability {
+  string name = 1;
+  bool enabled = 2;
+  string detail = 3;
+}
+
+message CapabilitiesRequest {}
+
+message CapabilitiesResponse {
+  repeated Capability capabilities = 1;
+}
+
+message Heartbeat {
+  Timestamp sent_at = 1;
+  Role sender_role = 2;
+}
+

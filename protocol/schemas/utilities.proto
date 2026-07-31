@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "UtilitiesProto";
+
+import "common.proto";
+
+enum RingPhoneAction {
+  RING_PHONE_ACTION_UNSPECIFIED = 0;
+  RING_PHONE_ACTION_START = 1;
+  RING_PHONE_ACTION_STOP = 2;
+}
+
+message RingPhoneRequest {
+  string request_id = 1;
+  RingPhoneAction action = 2;
+  uint32 duration_ms = 3;
+  Timestamp requested_at = 4;
+}
+
+message RingPhoneResult {
+  string request_id = 1;
+  bool success = 2;
+  string detail = 3;
+  bool ringing = 4;
+  Timestamp completed_at = 5;
+}

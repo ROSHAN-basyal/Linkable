@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "PairingProto";
+
+import "common.proto";
+
+message PairingRequest {
+  PeerDescriptor initiator = 1;
+  bytes pairing_nonce = 2;
+  bool direct_connect = 3;
+}
+
+message PairingChallenge {
+  PeerDescriptor acceptor = 1;
+  bytes challenge_nonce = 2;
+  uint32 verification_code_length = 3;
+  string code_derivation_label = 4;
+}
+
+message PairingConfirm {
+  PeerDescriptor confirmer = 1;
+  bytes transcript_hash = 2;
+  bytes transcript_signature = 3;
+}
+
+message PairingComplete {
+  PeerDescriptor trusted_peer = 1;
+  Timestamp paired_at = 2;
+}
+
+enum PairingRejectReason {
+  PAIRING_REJECT_REASON_UNSPECIFIED = 0;
+  PAIRING_REJECT_REASON_USER_DECLINED = 1;
+  PAIRING_REJECT_REASON_CODE_MISMATCH = 2;
+  PAIRING_REJECT_REASON_PROTOCOL_MISMATCH = 3;
+  PAIRING_REJECT_REASON_TIMEOUT = 4;
+  PAIRING_REJECT_REASON_DUPLICATE_DEVICE = 5;
+  PAIRING_REJECT_REASON_INTERNAL_ERROR = 6;
+}
+
+message PairingReject {
+  PairingRejectReason reason = 1;
+  string detail = 2;
+}
+

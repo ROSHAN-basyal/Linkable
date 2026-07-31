@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package linkable.protocol.v1;
+
+option java_multiple_files = true;
+option java_package = "com.linkable.protocol.v1";
+option java_outer_classname = "BluetoothProto";
+
+import "common.proto";
+
+enum BluetoothBondState {
+  BLUETOOTH_BOND_STATE_UNSPECIFIED = 0;
+  BLUETOOTH_BOND_STATE_NONE = 1;
+  BLUETOOTH_BOND_STATE_BONDING = 2;
+  BLUETOOTH_BOND_STATE_BONDED = 3;
+}
+
+message BluetoothAssistDesktopStatus {
+  string request_id = 1;
+  bool adapter_available = 2;
+  bool powered = 3;
+  bool pairable = 4;
+  bool discoverable = 5;
+  string adapter_address = 6;
+  string adapter_alias = 7;
+  bool hfp_audio_ready = 8;
+  bool auto_start_bonding = 9;
+  string detail = 10;
+  Timestamp generated_at = 11;
+  string expected_phone_name = 12;
+}
+
+message BluetoothAssistPhoneStatus {
+  string request_id = 1;
+  bool bluetooth_connect_permission_granted = 2;
+  bool bluetooth_scan_permission_granted = 3;
+  bool adapter_available = 4;
+  bool adapter_enabled = 5;
+  string adapter_name = 6;
+  string desktop_address = 7;
+  BluetoothBondState desktop_bond_state = 8;
+  bool bond_request_started = 9;
+  bool bluetooth_settings_opened = 10;
+  string detail = 11;
+  Timestamp generated_at = 12;
+  bool desktop_connected = 13;
+  string connected_desktop_name = 14;
+  string connected_desktop_address = 15;
+  bool desktop_a2dp_connected = 16;
+  bool desktop_headset_connected = 17;
+  string route_warning = 18;
+}
