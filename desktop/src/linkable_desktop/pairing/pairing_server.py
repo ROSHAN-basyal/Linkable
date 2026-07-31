@@ -620,7 +620,7 @@ class PairingSessionService:
                             transport_pb2.Capability(name="telephony_diagnostics", enabled=True, detail="Requests Android permission, SIM, and call capability status over LAN"),
                             transport_pb2.Capability(name="notification_call_actions", enabled=True, detail="Uses Android notification PendingIntent actions for third-party app calls when exposed"),
                             transport_pb2.Capability(name="desktop_input_controls", enabled=True, detail="Receives Linkable keyboard, pointer, and audio control requests over encrypted LAN"),
-                            transport_pb2.Capability(name="bluetooth_optional", enabled=True, detail="Milestone 4 transport does not use Bluetooth"),
+                            transport_pb2.Capability(name="bluetooth_optional", enabled=True, detail="LAN transport does not require Bluetooth"),
                         ]
                     )
                     encrypted.write_envelope(

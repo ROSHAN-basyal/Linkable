@@ -108,7 +108,7 @@ def cmd_connect_by_ip(endpoint: str) -> int:
     candidate = parse_direct_connect_endpoint(endpoint, default_port=config.service_port)
     device = candidate.to_device(device_name="Direct Connect Candidate")
     print(render_device_table([device]))
-    print("\nTransport bootstrap is not implemented in Milestone 2 yet.")
+    print("\nEndpoint parsed successfully. Use the Android app or desktop GUI to connect.")
     return 0
 
 
@@ -151,7 +151,7 @@ def cmd_hfp_remove_phone_safe() -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Linkable desktop Milestone 3 utilities")
+    parser = argparse.ArgumentParser(description="Linkable desktop utilities")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("init-config", help="Write the default config file if it does not exist")

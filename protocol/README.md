@@ -1,12 +1,18 @@
 # Protocol
 
-This directory contains the complete Milestone 1 protocol surface for Phase 1.
+This directory defines the wire protocol shared by the Android and Linux
+applications.
 
 ## Contents
 
 - `schemas/`: protobuf schema files
-- `docs/`: protocol specification and security notes
-- `generated/`: generated outputs from `scripts/generate_proto.sh`
+- `docs/`: protocol specification, packet flow, lock-screen policy, and threat
+  model
+
+Generated Android sources are produced by Gradle during a build. Generated
+desktop Python modules are committed under
+`desktop/src/linkable_desktop/generated_proto` so a source installation does
+not require `protoc`.
 
 ## Schema Strategy
 
@@ -27,3 +33,5 @@ Generate all outputs with:
 ./scripts/generate_proto.sh
 ```
 
+This developer command requires `protoc`. Normal Android and desktop builds do
+not.

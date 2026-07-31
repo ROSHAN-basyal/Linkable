@@ -1,2 +1,1 @@
-# Milestone 2 does not require custom ProGuard rules.
-
+# Linkable currently uses the Android Gradle Plugin defaults.
